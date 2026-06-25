@@ -475,7 +475,7 @@
         <div class="summary" id="summary">
           利用時間・お部屋・人数・日時を選択すると、ここに予約内容が表示されます。
         </div>
-<button type="submit" class="submit-btn">この内容で決済へ進む</button>
+<button type="submit" class="submit-btn">この内容で予約を確定する</button>
 
         <div class="note">
           ※これはHTMLのみの仮画面です。次のステップでGoogleスプレッドシートに保存できるようにします。
@@ -485,6 +485,7 @@
   </div>
 
   <script>
+const RESERVATION_GAS_URL = 'https://script.google.com/macros/s/AKfycbwHUnVR4pT-g8Xw5SLBiG6tjQHPHBWfejpQJV8gzlz9VPIndUDCU6y6m0L4v9wC7g3K/exec';
     const durationSelect = document.getElementById('duration');
     const roomSelect = document.getElementById('room');
     const peopleSelect = document.getElementById('people');
@@ -961,7 +962,7 @@ const price = getPriceInfo();
       try {
         if (submitButton) {
           submitButton.disabled = true;
-          submitButton.textContent = '決済ページを作成中...';
+          submitButton.textContent = '予約を登録中...';
         }
 
         const res = await fetch('/.netlify/functions/create-checkout-session', {
@@ -989,7 +990,7 @@ const price = getPriceInfo();
       } finally {
         if (submitButton) {
           submitButton.disabled = false;
-          submitButton.textContent = 'この内容で決済へ進む';
+          submitButton.textContent = 'この内容で予約を確定する';
         }
       }
     });

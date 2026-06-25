@@ -475,7 +475,7 @@
         <div class="summary" id="summary">
           利用時間・お部屋・人数・日時を選択すると、ここに予約内容が表示されます。
         </div>
-<button type="submit" class="submit-btn">この内容で決済へ進む</button>
+<button type="submit" class="submit-btn">この内容で予約を確定する</button>
 
         <div class="note">
           ※これはHTMLのみの仮画面です。次のステップでGoogleスプレッドシートに保存できるようにします。
@@ -485,6 +485,7 @@
   </div>
 
   <script>
+const RESERVATION_GAS_URL = 'https://script.google.com/macros/s/AKfycbwHUnVR4pT-g8Xw5SLBiG6tjQHPHBWfejpQJV8gzlz9VPIndUDCU6y6m0L4v9wC7g3K/exec';
     const durationSelect = document.getElementById('duration');
     const roomSelect = document.getElementById('room');
     const peopleSelect = document.getElementById('people');
@@ -903,7 +904,31 @@ const price = getPriceInfo();
     ensureCancelPolicy();
 
 
-    document.getElementById('reservationForm').addEventListener('submit', function(e) {
+    
+function sendReservationToGAS(booking){
+  return new Promise((resolve, reject) => {
+    const callbackName = "reservationCallback_" + Date.now();
+
+    window[callbackName] = function(res){
+      delete window[callbackName];
+      resolve(res);
+    };
+
+    const script = document.createElement("script");
+    script.src = RESERVATION_GAS_URL
+      + "?action=add&callback=" + callbackName
+      + "&data=" + encodeURIComponent(JSON.stringify(booking));
+
+    script.onerror = function(){
+      delete window[callbackName];
+      reject(new Error("予約送信に失敗しました"));
+    };
+
+    document.body.appendChild(script);
+  });
+}
+
+    document.getElementById('reservationForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       if (!durationSelect.value) {
@@ -960,7 +985,41 @@ const price = getPriceInfo();
         finalPrice: price.finalPrice
       });
 
-      window.location.href = `checkout.html?${params.toString()}`;
+      const booking = {
+        id: Date.now(),
+        date: document.getElementById('date').value,
+        room: roomSelect.value,
+        start: timeInput.value,
+        end: endTimeInput.value,
+        duration: Number(durationSelect.value || 0),
+        name: document.getElementById('name').value || 'お客様',
+        people: Number(peopleSelect.value || 1),
+        gender: '未確認',
+        type: coworkingPlanSelect.value && coworkingPlanSelect.value !== '利用なし' ? 'combo' : 'sauna',
+        menu: coworkingPlanSelect.value && coworkingPlanSelect.value !== '利用なし'
+          ? `サウナ＋コワーキング ${durationSelect.value}分`
+          : `サウナ ${durationSelect.value}分`,
+        option: [
+          optionSaunaHatCount.value > 0 ? `サウナハット×${optionSaunaHatCount.value}` : '',
+          optionRefaSetCount.value > 0 ? `Refa×${optionRefaSetCount.value}` : '',
+          optionMintBath.checked ? 'ミント風呂' : '',
+          optionCool.checked ? '極的COOL' : ''
+        ].filter(Boolean).join('、') || 'なし',
+        price: Number(price.finalPrice || 0),
+        status: '予約確定',
+        phone: document.getElementById('phone').value,
+        route: 'WEB',
+        floor: '2F',
+        note: document.getElementById('memo').value || ''
+      };
+
+      try{
+        await sendReservationToGAS(booking);
+        alert('予約を受け付けました。');
+        window.location.href = `success.html?${params.toString()}`;
+      }catch(err){
+        alert('予約登録に失敗しました。時間をおいて再度お試しください。');
+      }
     });
 
     resetRoomOptions();
