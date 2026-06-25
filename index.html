@@ -456,8 +456,8 @@
         <input type="tel" id="phone" placeholder="例：09012345678" required />
 
 <div id="customerAutoBox" class="customer-auto-box">
-  <div class="customer-auto-title" id="customerAutoName">電話番号を入力すると顧客情報を確認できます</div>
-  <div class="customer-auto-sub" id="customerAutoHistory">未入力</div>
+  <div class="customer-auto-title" id="customerAutoName">電話番号を入力してください</div>
+  <div class="customer-auto-sub" id="customerAutoHistory">予約確認のために使用します</div>
   <div class="customer-auto-sub" id="customerAutoMemo"></div>
 </div>
 
@@ -783,7 +783,7 @@ const RESERVATION_GAS_URL = 'https://script.google.com/macros/s/AKfycbwHUnVR4pT-
       const date = document.getElementById('date').value || '未選択';
       const time = timeInput.value || '未選択';
       const endTime = endTimeInput.value || '';
-      const name = document.getElementById('name').value || '未入力';
+      const name = document.getElementById('name').value || '予約確認のために使用します';
       const timeText = endTime ? `${time}〜${endTime}` : time;
 
       const coworkingPlan = coworkingPlanSelect.value;
@@ -1065,37 +1065,20 @@ function getValue(obj, keys){
 }
 
 function showCustomer(customer){
-  const lastName = getValue(customer, ["顧客名（姓）","姓"]);
-  const firstName = getValue(customer, ["顧客名（名）","名"]);
-  const fullName = (lastName + " " + firstName).trim()
-    || getValue(customer, ["氏名","お名前","顧客名","名前"])
-    || "登録あり";
-
-  const count = getValue(customer, ["購入回数(通算)","購入回数","来店回数","利用回数"]) || "0";
-  const amountRaw = getValue(customer, ["利用金額(通算)","利用金額","累計利用額","購入金額"]) || "0";
-  const amount = Number(String(amountRaw).replace(/[^0-9]/g,"") || 0).toLocaleString("ja-JP");
-  const rank = getValue(customer, ["ランク","会員ランク"]) || "-";
-  const point = getValue(customer, ["有効ポイント","ポイント","保有ポイント"]) || "0";
-  const memo = getValue(customer, ["顧客メモ","メモ","備考"]) || "";
-  const member = getValue(customer, ["会員/非会員","会員区分"]) || "";
-
-  const nameInput = document.getElementById("name");
-  if(nameInput && !nameInput.value) nameInput.value = fullName;
-
-  document.getElementById("customerAutoName").textContent = fullName;
-  document.getElementById("customerAutoHistory").textContent = `${member} ／ 来店 ${count}回 ／ 累計 ${amount}円`;
-  document.getElementById("customerAutoMemo").textContent = memo ? `${memo} ／ ランク：${rank} ／ ポイント：${point}` : `ランク：${rank} ／ ポイント：${point}`;
+  document.getElementById("customerAutoName").textContent = "✓ ご登録情報を確認しました";
+  document.getElementById("customerAutoHistory").textContent = "予約情報の確認に使用します";
+  document.getElementById("customerAutoMemo").textContent = "";
 }
 
 function showCustomerDefault(){
-  document.getElementById("customerAutoName").textContent = "電話番号を入力すると顧客情報を確認できます";
-  document.getElementById("customerAutoHistory").textContent = "未入力";
+  document.getElementById("customerAutoName").textContent = "電話番号を入力してください";
+  document.getElementById("customerAutoHistory").textContent = "予約確認のために使用します";
   document.getElementById("customerAutoMemo").textContent = "";
 }
 
 function showCustomerNotFound(){
-  document.getElementById("customerAutoName").textContent = "未登録のお客様";
-  document.getElementById("customerAutoHistory").textContent = "新規予約として受付できます";
+  document.getElementById("customerAutoName").textContent = "初めてのご利用ありがとうございます";
+  document.getElementById("customerAutoHistory").textContent = "このまま予約できます";
   document.getElementById("customerAutoMemo").textContent = "";
 }
 
