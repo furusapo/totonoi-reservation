@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>予約管理画面</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif;
+      background: #f6f4ef;
+      color: #222;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #1f1f1f;
+      color: #fff;
+      padding: 24px 18px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 28px;
+    }
+
+    .nav a {
+      display: block;
+      color: #ddd;
+      text-decoration: none;
+      padding: 13px 14px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background: #333;
+      color: #fff;
+    }
+
+    .main {
+      padding: 28px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .add-btn {
+      background: #222;
+      color: #fff;
+      border: none;
+      padding: 13px 18px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .panel h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+    }
+
+    .reservation {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding: 14px 0;
+    }
+
+    .reservation:last-child {
+      border-bottom: none;
+    }
+
+    .time {
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .name {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .detail {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .status {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #f0eadf;
+    }
+
+    .status.confirmed {
+      background: #e8f5ed;
+      color: #217a43;
+    }
+
+    .status.block {
+      background: #f2f2f2;
+      color: #777;
+    }
+
+    .form-row {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #ddd7ce;
+      border-radius: 13px;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 82px;
+    }
+
+    .save-btn {
+      width: 100%;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .stats,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .top {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">ととのい+ 管理</div>
+      <nav class="nav">
+        <a href="#" class="active">予約一覧</a>
+        <a href="#">カレンダー</a>
+        <a href="#">予約追加</a>
+        <a href="#">ブロック設定</a>
+        <a href="#">顧客管理</a>
+        <a href="reservation.html">予約ページを開く</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="top">
+        <div>
+          <h1>予約管理</h1>
+          <p>今日の予約・手動追加・ブロックをまとめて管理します。</p>
+        </div>
+        <button class="add-btn">＋ 予約を追加</button>
+      </div>
+
+      <section class="stats">
+        <div class="stat-card">
+          <div class="stat-label">今日の予約</div>
+          <div class="stat-number">6</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">明日の予約</div>
+          <div class="stat-number">4</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">未確認</div>
+          <div class="stat-number">2</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ブロック</div>
+          <div class="stat-number">1</div>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel" id="reservationsPanel">
+          <h2 id="reservationsTitle">予約一覧</h2>
+          <div id="reservationsList">
+            <div class="reservation">
+              <div class="time">--:--</div>
+              <div>
+                <div class="name">読み込み中</div>
+                <div class="detail">予約台帳からデータを取得しています。</div>
+              </div>
+              <div class="status confirmed">確認中</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>手動予約追加</h2>
+
+          <div class="form-row">
+            <label>お名前</label>
+            <input type="text" placeholder="例：山田 太郎">
+          </div>
+
+          <div class="form-row">
+            <label>メニュー</label>
+            <select>
+              <option>プライベートサウナ 90分</option>
+              <option>プライベートサウナ 120分</option>
+              <option>コワーキング利用</option>
+              <option>会議室利用</option>
+              <option>ギフトチケット利用</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>予約日</label>
+            <input type="date">
+          </div>
+
+          <div class="form-row">
+            <label>開始時間</label>
+            <input type="time">
+          </div>
+
+          <div class="form-row">
+            <label>部屋</label>
+            <select>
+              <option>ROOM1</option>
+              <option>ROOM2</option>
+              <option>ROOM3</option>
+              <option>ROOM4</option>
+              <option>ROOM5</option>
+              <option>コワーキング</option>
+              <option>会議室</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>メモ</label>
+            <textarea placeholder="電話予約・LINE予約・ギフト券利用など"></textarea>
+          </div>
+
+          <button class="save-btn" onclick="alert('次のステップでスプレッドシート保存に対応します')">
+            予約を保存
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, function(char) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[char];
+      });
+    }
+
+    function normalizeDate(value) {
+      if (!value) return '';
+      const text = String(value);
+      if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
+        return text.slice(0, 10);
+      }
+      const date = new Date(text);
+      if (Number.isNaN(date.getTime())) return text;
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateLabel(dateText) {
+      if (!dateText) return '予約一覧';
+      return dateText.replaceAll('-', '/');
+    }
+
+    function getTodayText(offsetDays = 0) {
+      const date = new Date();
+      date.setDate(date.getDate() + offsetDays);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getField(item, name) {
+      return item[name] ?? '';
+    }
+
+    function renderReservations(reservations) {
+      const list = document.getElementById('reservationsList');
+      const title = document.getElementById('reservationsTitle');
+      const statNumbers = document.querySelectorAll('.stat-number');
+
+      const today = getTodayText(0);
+      const tomorrow = getTodayText(1);
+
+      const confirmed = reservations.filter(item => {
+        return getField(item, '予約ステータス') === 'confirmed';
+      });
+
+      confirmed.sort((a, b) => {
+        const aKey = `${normalizeDate(getField(a, '予約日'))} ${getField(a, '開始時間')}`;
+        const bKey = `${normalizeDate(getField(b, '予約日'))} ${getField(b, '開始時間')}`;
+        return aKey.localeCompare(bKey);
+      });
+
+      const todayCount = confirmed.filter(item => normalizeDate(getField(item, '予約日')) === today).length;
+      const tomorrowCount = confirmed.filter(item => normalizeDate(getField(item, '予約日')) === tomorrow).length;
+
+      if (statNumbers[0]) statNumbers[0].textContent = todayCount;
+      if (statNumbers[1]) statNumbers[1].textContent = tomorrowCount;
+      if (statNumbers[2]) statNumbers[2].textContent = 0;
+      if (statNumbers[3]) statNumbers[3].textContent = 0;
+
+      if (!confirmed.length) {
+        title.textContent = '予約一覧';
+        list.innerHTML = `
+          <div class="reservation">
+            <div class="time">--:--</div>
+            <div>
+              <div class="name">予約なし</div>
+              <div class="detail">現在、確定済みの予約はありません。</div>
+            </div>
+            <div class="status confirmed">空き</div>
+          </div>
+        `;
+        return;
+      }
+
+      title.textContent = '確定済み予約一覧';
+
+      list.innerHTML = confirmed.map(item => {
+        const date = normalizeDate(getField(item, '予約日'));
+        const startTime = getField(item, '開始時間') || '--:--';
+        const endTime = getField(item, '終了時間') || '';
+        const name = getField(item, 'お客様名') || 'お客様';
+        const menu = getField(item, 'メニュー') || '予約';
+        const room = getField(item, '部屋') || '';
+        const people = getField(item, '人数') || '';
+        const amount = getField(item, '金額') || '';
+        const payment = getField(item, '決済ステータス') || '';
+
+        const detailParts = [
+          formatDateLabel(date),
+          endTime ? `${startTime}〜${endTime}` : startTime,
+          menu,
+          room,
+          people ? `${people}名` : '',
+          amount ? `¥${Number(amount).toLocaleString('ja-JP')}` : '',
+          payment ? `決済：${payment}` : ''
+        ].filter(Boolean);
+
+        return `
+          <div class="reservation">
+            <div class="time">${escapeHtml(startTime)}</div>
+            <div>
+              <div class="name">${escapeHtml(name)} 様</div>
+              <div class="detail">${escapeHtml(detailParts.join(' / '))}</div>
+            </div>
+            <div class="status confirmed">予約確定</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadReservations() {
+      const list = document.getElementById('reservationsList');
+
+      try {
+        const response = await fetch('/.netlify/functions/get-reservations');
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || '予約一覧の取得に失敗しました');
+        }
+
+        renderReservations(data.reservations || []);
+
+      } catch (error) {
+        console.error(error);
+        list.innerHTML = `
+          <div class="reservation">
+            <div class="time">ERROR</div>
+            <div>
+              <div class="name">読み込みエラー</div>
+              <div class="detail">${escapeHtml(error.message)}</div>
+            </div>
+            <div class="status block">要確認</div>
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadReservations);
+  </script>
+
+</body>
+</html>

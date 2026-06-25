@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>決済確認</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif;
+      background: #f6f4ef;
+      color: #222;
+    }
+
+    .page {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .header {
+      background: #111;
+      color: #fff;
+      padding: 28px 22px;
+      border-radius: 24px;
+      margin-bottom: 20px;
+    }
+
+    .header .label {
+      font-size: 13px;
+      opacity: 0.75;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic", sans-serif;
+      font-size: 26px;
+    }
+
+    .header p {
+      margin: 10px 0 0;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #e7e0d4;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 22px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 18px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 11px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #777;
+    }
+
+    .value {
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .price-box {
+      background: #faf8f3;
+      border: 1px solid #ebe3d6;
+      border-radius: 18px;
+      padding: 16px;
+      margin-top: 10px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+
+    .discount {
+      color: #217a43;
+      font-weight: 800;
+    }
+
+    .total {
+      border-top: 1px solid #e5dcca;
+      margin-top: 8px;
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .total-label {
+      font-weight: 800;
+    }
+
+    .total-price {
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .pay-btn {
+      width: 100%;
+      border: none;
+      border-radius: 18px;
+      background: #222;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 800;
+      padding: 17px;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+
+    .back-btn {
+      width: 100%;
+      border: 1px solid #ddd7ce;
+      border-radius: 18px;
+      background: #fff;
+      color: #222;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .note {
+      font-size: 12px;
+      line-height: 1.7;
+      color: #777;
+      margin-top: 12px;
+    }
+
+    .complete {
+      display: none;
+      background: #fff;
+      border-radius: 22px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    .complete h2 {
+      font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="label">Checkout</div>
+      <h1>決済内容の確認</h1>
+      <p>ご予約内容と料金をご確認のうえ、決済へお進みください。</p>
+    </div>
+
+    <div id="checkoutArea">
+      <div class="card">
+        <h2>予約内容</h2>
+
+        <div class="row">
+          <div class="label">メニュー</div>
+          <div class="value" id="menuText"></div>
+        </div>
+
+        <div class="row">
+          <div class="label">お部屋</div>
+          <div class="value" id="roomText"></div>
+        </div>
+
+        <div class="row">
+          <div class="label">人数</div>
+          <div class="value" id="peopleText"></div>
+        </div>
+
+        <div class="row">
+          <div class="label">日時</div>
+          <div class="value" id="dateText"></div>
+        </div>
+
+        <div class="row">
+          <div class="label">コワーキング併用</div>
+          <div class="value" id="coworkingText"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>お客様情報</h2>
+
+        <div class="row">
+          <div class="label">お名前</div>
+          <div class="value" id="nameText"></div>
+        </div>
+
+        <div class="row">
+          <div class="label">電話番号</div>
+          <div class="value" id="phoneText"></div>
+        </div>
+
+        <div class="row">
+          <div class="label">メール</div>
+          <div class="value" id="emailText"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>お支払い金額</h2>
+
+        <div class="price-box">
+          <div class="price-row">
+            <span>通常料金</span>
+            <strong id="basePriceText"></strong>
+          </div>
+
+          <div class="price-row discount" id="discountRow">
+            <span>コワーキング併用割引</span>
+            <strong id="discountText"></strong>
+          </div>
+
+          <div class="total">
+            <span class="total-label">合計</span>
+            <span class="total-price" id="finalPriceText"></span>
+          </div>
+        </div>
+
+        <button class="pay-btn" id="payButton">決済へ進む</button>
+        <button class="back-btn" onclick="history.back()">予約内容を修正する</button>
+
+        <div class="note">
+          ※現在は仮の決済画面です。本番では「決済へ進む」ボタンを決済サービスのURLに接続します。
+        </div>
+      </div>
+    </div>
+
+    <div class="complete" id="completeArea">
+      <h2>決済リンクへ進む想定です</h2>
+      <p>本番ではここでクレジットカード決済画面に移動します。</p>
+      <button class="back-btn" onclick="location.href='reservation.html'">予約ページへ戻る</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    function getParam(key, fallback = '') {
+      return params.get(key) || fallback;
+    }
+
+    function yen(num) {
+      return `¥${Number(num || 0).toLocaleString()}`;
+    }
+
+    const duration = getParam('duration');
+    const room = getParam('room');
+    const people = getParam('people');
+    const date = getParam('date');
+    const startTime = getParam('startTime');
+    const endTime = getParam('endTime');
+    const coworking = getParam('coworking', 'なし');
+
+    const name = getParam('name');
+    const phone = getParam('phone');
+    const email = getParam('email');
+
+    const basePrice = Number(getParam('basePrice', 0));
+    const discount = Number(getParam('discount', 0));
+    const finalPrice = Number(getParam('finalPrice', 0));
+
+    document.getElementById('menuText').textContent = `プライベートサウナ ${duration}分`;
+    document.getElementById('roomText').textContent = room;
+    document.getElementById('peopleText').textContent = `${people}名`;
+    document.getElementById('dateText').textContent = `${date} ${startTime}〜${endTime}`;
+    document.getElementById('coworkingText').textContent = coworking;
+
+    document.getElementById('nameText').textContent = name;
+    document.getElementById('phoneText').textContent = phone;
+    document.getElementById('emailText').textContent = email;
+
+    document.getElementById('basePriceText').textContent = yen(basePrice);
+    document.getElementById('discountText').textContent = `-${yen(discount)}`;
+    document.getElementById('finalPriceText').textContent = yen(finalPrice);
+
+    if (discount <= 0) {
+      document.getElementById('discountRow').style.display = 'none';
+    }
+
+    document.getElementById('payButton').addEventListener('click', () => {
+      // 本番ではここを Stripe / Square / STORES決済URL に差し替えます。
+      // 例：window.location.href = 'https://payment.example.com/...';
+
+      document.getElementById('checkoutArea').style.display = 'none';
+      document.getElementById('completeArea').style.display = 'block';
+    });
+  </script>
+</body>
+</html>

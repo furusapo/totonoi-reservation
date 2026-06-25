@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ととのい+ 予約受付</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif;
+      background: #f6f4ef;
+      color: #222;
+    }
+    .page {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+    .header {
+      background: #111;
+      color: #fff;
+      padding: 28px 22px;
+      border-radius: 24px;
+      margin-bottom: 20px;
+    }
+    .header .label {
+      font-size: 13px;
+      opacity: 0.75;
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      margin: 0;
+      font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic", sans-serif;
+      font-size: 26px;
+    }
+    .header p {
+      margin: 10px 0 0;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #e7e0d4;
+    }
+    .card {
+      background: #fff;
+      border-radius: 22px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+    .step-title {
+      font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic", sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      margin-bottom: 14px;
+      font-size: 18px;
+    }
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #222;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 16px 0 7px;
+    }
+    select, input, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #ddd7ce;
+      border-radius: 14px;
+      font-size: 15px;
+      background: #fff;
+    }
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+    .option-box {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #faf8f3;
+      border: 1px solid #ebe3d6;
+    }
+    .option-box.show { display: block; }
+    .option-title {
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .option-text {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #666;
+    }
+    .discount-badge {
+      display: inline-block;
+      background: #222;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 999px;
+      margin-top: 8px;
+    }
+
+    .option-check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee6da;
+    }
+
+    .option-check:last-child {
+      border-bottom: none;
+    }
+
+    .option-check input {
+      width: auto;
+      margin-top: 4px;
+      transform: scale(1.2);
+    }
+
+    .option-check strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .option-check span {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .room-limited-options {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #e6ded2;
+    }
+
+    .clear-option-btn {
+      width: 100%;
+      border: 1px solid #ddd7ce;
+      background: #fff;
+      color: #555;
+      border-radius: 14px;
+      padding: 11px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .clear-option-btn:hover {
+      background: #faf8f3;
+    }
+    .info-box {
+      background: #f1eee7;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #555;
+      margin-top: 14px;
+    }
+    .note {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .time-empty {
+      grid-column: 1 / -1;
+      margin: 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: #faf8f3;
+      color: #777;
+      font-size: 14px;
+    }
+    .time-btn {
+      border: 1px solid #ded7cc;
+      background: #fff;
+      border-radius: 14px;
+      padding: 11px 4px;
+      font-size: 14px;
+      cursor: pointer;
+      line-height: 1.35;
+    }
+    .time-btn small {
+      color: #777;
+      font-size: 11px;
+    }
+    .time-btn.selected {
+      background: #222;
+      color: #fff;
+      border-color: #222;
+    }
+    .time-btn.selected small { color: #fff; }
+    .summary {
+      background: #faf8f3;
+      border: 1px solid #ebe3d6;
+      padding: 18px;
+      border-radius: 18px;
+      font-size: 16px;
+      line-height: 1.9;
+    }
+    .price-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-top: 1px solid #e8dfd2;
+      padding-top: 12px;
+      margin-top: 12px;
+      align-items: flex-end;
+    }
+    .price-main {
+      font-size: 28px;
+      font-weight: 900;
+    }
+    .discount-text {
+      color: #217a43;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+    .submit-btn {
+      width: 100%;
+      border: none;
+      border-radius: 18px;
+      background: #222;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 800;
+      padding: 16px;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="label">Reservation</div>
+      <h1>ととのい+ 予約受付</h1>
+      <p>サウナのご予約をこちらから受け付けています。コワーキングのみのご利用は予約不要です。</p>
+    </div>
+
+    <form id="reservationForm">
+      <div class="card">
+        <div class="step-title"><span class="step-number">1</span>利用時間を選択</div>
+
+        <label for="duration">ご利用時間</label>
+        <select id="duration" required>
+          <option value="">選択してください</option>
+          <option value="70">70分</option>
+          <option value="90">90分</option>
+          <option value="120">120分</option>
+        </select>
+
+        <div class="option-box" id="coworkingOptionBox">
+          <div class="option-title">コワーキングも一緒に利用する</div>
+          <div class="option-text">
+            コワーキング利用料金は人数分で加算されます。サウナ料金20%OFFは「1日利用」の場合のみ適用されます。
+          </div>
+
+          <label for="coworkingPlan">コワーキング利用プラン</label>
+          <select id="coworkingPlan">
+            <option value="">利用しない</option>
+            <option value="1時間">1時間利用　500円</option>
+            <option value="3時間">3時間利用　800円</option>
+            <option value="1日">1日利用　1,500円（サウナ料金20%OFF）</option>
+          </select>
+
+          <span class="discount-badge">1日利用のみ サウナ料金20%OFF</span>
+        </div>
+
+        <div class="info-box">
+          コワーキングのみのご利用は予約不要です。サウナと一緒に利用される方は、コワーキング利用プランを選択してください。
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-title"><span class="step-number">2</span>お部屋と人数を選択</div>
+
+        <label for="room">利用スペース</label>
+        <select id="room" required>
+          <option value="">先に利用時間を選択してください</option>
+        </select>
+        <div class="note" id="roomNote">利用時間に応じて予約可能なお部屋が表示されます。</div>
+
+        <label for="people">人数</label>
+        <select id="people" required>
+          <option value="">先にお部屋を選択してください</option>
+        </select>
+        <div class="note" id="capacityNote">選択したお部屋に応じて、予約可能な人数が表示されます。</div>
+
+        <div class="option-box show" id="saunaOptionBox">
+          <div class="option-title">追加オプション</div>
+          <div class="option-text">
+            必要なオプションを選択してください。サウナハットはご利用人数分で計算されます。
+          </div>
+
+          <div class="option-check">
+            <div style="width:100%;">
+              <strong>サウナハット　700円 / 個</strong>
+              <span>必要な個数を選択してください。人数を超える個数は選べません。</span>
+
+              <label for="optionSaunaHatCount">サウナハットの個数</label>
+              <select id="optionSaunaHatCount">
+                <option value="0">利用しない</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="option-check">
+            <div style="width:100%;">
+              <strong>ReFa 3連セット　410円 / 個</strong>
+              <span>シャンプー・ボディソープ・トリートメントのセットです。必要な個数を選択してください。</span>
+
+              <label for="optionRefaSetCount">ReFa 3連セットの個数</label>
+              <select id="optionRefaSetCount">
+                <option value="0">利用しない</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="room-limited-options" id="roomLimitedOptions">
+            <label class="option-check">
+              <input type="radio" name="bathOption" id="optionMintBath" value="ミント風呂">
+              <div>
+                <strong>ミント風呂　330円</strong>
+                <span>ROOM3・ROOM5のみ選択できます。人数に関係なく1回分の料金です。</span>
+              </div>
+            </label>
+
+            <label class="option-check">
+              <input type="radio" name="bathOption" id="optionCool" value="極的COOL">
+              <div>
+                <strong>極的COOL　330円</strong>
+                <span>ROOM3・ROOM5のみ選択できます。人数に関係なく1回分の料金です。</span>
+              </div>
+            </label>
+
+            <button type="button" class="clear-option-btn" id="clearBathOption">
+              ミント風呂・極的COOLの選択を解除
+            </button>
+          </div>
+
+          <div class="note" id="optionNote">
+            ミント風呂・極的COOLはROOM3またはROOM5を選択した場合のみ表示されます。
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step-title"><span class="step-number">3</span>日時を選択</div>
+
+        <label for="date">予約日</label>
+        <input type="date" id="date" required />
+
+        <label>開始時間</label>
+        <div class="time-grid" id="timeGrid">
+          <p class="time-empty">先に利用時間を選択してください</p>
+        </div>
+
+        <input type="hidden" id="time" required />
+        <input type="hidden" id="endTime" />
+      </div>
+
+      <div class="card">
+        <div class="step-title"><span class="step-number">4</span>お客様情報</div>
+
+        <label for="name">お名前</label>
+        <input type="text" id="name" placeholder="例：山田 太郎" required />
+
+        <label for="phone">電話番号</label>
+        <input type="tel" id="phone" placeholder="例：09012345678" required />
+
+        <label for="email">メールアドレス</label>
+        <input type="email" id="email" placeholder="例：sample@example.com" required />
+
+        <label for="memo">備考</label>
+        <textarea id="memo" placeholder="ギフトチケット利用・ご要望など"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="step-title"><span class="step-number">5</span>予約内容の確認</div>
+
+        <div class="summary" id="summary">
+          利用時間・お部屋・人数・日時を選択すると、ここに予約内容が表示されます。
+        </div>
+
+        <button type="submit" class="submit-btn">この内容で決済へ進む</button>
+
+        <div class="note">
+          ※これはHTMLのみの仮画面です。次のステップでGoogleスプレッドシートに保存できるようにします。
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const durationSelect = document.getElementById('duration');
+    const roomSelect = document.getElementById('room');
+    const peopleSelect = document.getElementById('people');
+    const roomNote = document.getElementById('roomNote');
+    const capacityNote = document.getElementById('capacityNote');
+    const timeGrid = document.getElementById('timeGrid');
+    const timeInput = document.getElementById('time');
+    const endTimeInput = document.getElementById('endTime');
+    const summary = document.getElementById('summary');
+    const coworkingPlanSelect = document.getElementById('coworkingPlan');
+    const coworkingOptionBox = document.getElementById('coworkingOptionBox');
+    const optionSaunaHatCount = document.getElementById('optionSaunaHatCount');
+    const optionRefaSetCount = document.getElementById('optionRefaSetCount');
+    const optionMintBath = document.getElementById('optionMintBath');
+    const optionCool = document.getElementById('optionCool');
+    const roomLimitedOptions = document.getElementById('roomLimitedOptions');
+    const clearBathOption = document.getElementById('clearBathOption');
+    const optionNote = document.getElementById('optionNote');
+
+    const openMinutes = 8 * 60;
+    const closeMinutes = 24 * 60;
+    const intervalMinutes = 15;
+
+    const coworkingPrices = {
+      '1時間': 500,
+      '3時間': 800,
+      '1日': 1500
+    };
+
+    const optionPrices = {
+      saunaHat: 700,
+      refaSet: 410,
+      mintBath: 330,
+      cool: 330
+    };
+
+    const prices = {
+      70: {
+        'Room1': { 1: 3800, 2: 6800 },
+        'Room2': { 1: 4200, 2: 7200 },
+        'Room4': { 1: 3040 }
+      },
+      90: {
+        'Room1': { 1: 4200, 2: 7200 },
+        'Room2': { 1: 4600, 2: 7800 },
+        'Room3': { 1: 4500 },
+        'Room4': { 1: 3360 },
+        'Room5': { 1: 8800, 2: 11800, 3: 15600, 4: 19600 }
+      },
+      120: {
+        'Room1': { 1: 5400, 2: 9800 },
+        'Room2': { 1: 5600, 2: 10400 },
+        'Room3': { 1: 5700 },
+        'Room4': { 1: 4320 },
+        'Room5': { 1: 12000, 2: 14200, 3: 19200, 4: 24400 }
+      }
+    };
+
+    function yen(num) {
+      return `¥${Number(num || 0).toLocaleString()}`;
+    }
+
+    function minutesToTime(minutes) {
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    function resetRoomOptions() {
+      roomSelect.innerHTML = '<option value="">先に利用時間を選択してください</option>';
+      roomNote.textContent = '利用時間に応じて予約可能なお部屋が表示されます。';
+    }
+
+    function resetPeopleOptions() {
+      peopleSelect.innerHTML = '<option value="">先にお部屋を選択してください</option>';
+      capacityNote.textContent = '選択したお部屋に応じて、予約可能な人数が表示されます。';
+    }
+
+    function updateRoomOptions() {
+      const duration = durationSelect.value;
+
+      resetPeopleOptions();
+      timeInput.value = '';
+      endTimeInput.value = '';
+
+      if (!duration) {
+        resetRoomOptions();
+        coworkingOptionBox.classList.remove('show');
+        coworkingPlanSelect.value = '';
+        renderTimeButtons();
+        updateSummary();
+        return;
+      }
+
+      const availableRooms = Object.keys(prices[duration]);
+
+      roomSelect.innerHTML = '<option value="">選択してください</option>';
+      availableRooms.forEach(room => {
+        const option = document.createElement('option');
+        option.value = room;
+        option.textContent = room;
+        roomSelect.appendChild(option);
+      });
+
+      roomNote.textContent = `${duration}分で予約可能なお部屋のみ表示しています。`;
+      coworkingOptionBox.classList.add('show');
+
+      renderTimeButtons();
+      updateSummary();
+    }
+
+    function updatePeopleOptions() {
+      const duration = durationSelect.value;
+      const room = roomSelect.value;
+
+      if (!duration || !room) {
+        resetPeopleOptions();
+        updateSummary();
+        return;
+      }
+
+      const availablePeople = Object.keys(prices[duration][room]).map(Number);
+
+      peopleSelect.innerHTML = '<option value="">選択してください</option>';
+      availablePeople.forEach(num => {
+        const option = document.createElement('option');
+        option.value = num;
+        option.textContent = `${num}名`;
+        peopleSelect.appendChild(option);
+      });
+
+      const max = Math.max(...availablePeople);
+      capacityNote.textContent = `${room}は最大${max}名までご利用いただけます。`;
+      updateSaunaHatOptions();
+      updateRoomLimitedOptions();
+      updateSummary();
+    }
+
+    function renderTimeButtons() {
+      const duration = Number(durationSelect.value);
+
+      timeInput.value = '';
+      endTimeInput.value = '';
+      timeGrid.innerHTML = '';
+
+      if (!duration) {
+        timeGrid.innerHTML = '<p class="time-empty">先に利用時間を選択してください</p>';
+        return;
+      }
+
+      const lastStartMinutes = closeMinutes - duration;
+
+      for (let minutes = openMinutes; minutes <= lastStartMinutes; minutes += intervalMinutes) {
+        const start = minutesToTime(minutes);
+        const end = minutesToTime(minutes + duration);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'time-btn';
+        btn.dataset.time = start;
+        btn.dataset.endTime = end;
+        btn.innerHTML = `${start}<br><small>〜${end}</small>`;
+
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          timeInput.value = start;
+          endTimeInput.value = end;
+          updateSummary();
+        });
+
+        timeGrid.appendChild(btn);
+      }
+    }
+
+    function getBasePrice() {
+      const duration = durationSelect.value;
+      const room = roomSelect.value;
+      const people = peopleSelect.value;
+
+      if (!duration || !room || !people) return null;
+
+      return prices[duration]?.[room]?.[Number(people)] ?? null;
+    }
+
+    function updateCountSelectOptions(selectElement) {
+      const people = Number(peopleSelect.value || 0);
+      const currentValue = Number(selectElement.value || 0);
+
+      selectElement.innerHTML = '';
+
+      const defaultOption = document.createElement('option');
+      defaultOption.value = 0;
+      defaultOption.textContent = '利用しない';
+      selectElement.appendChild(defaultOption);
+
+      for (let i = 1; i <= people; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `${i}個`;
+        selectElement.appendChild(option);
+      }
+
+      if (currentValue <= people) {
+        selectElement.value = currentValue;
+      } else {
+        selectElement.value = 0;
+      }
+    }
+
+    function updateSaunaHatOptions() {
+      updateCountSelectOptions(optionSaunaHatCount);
+      updateCountSelectOptions(optionRefaSetCount);
+    }
+
+    function updateRoomLimitedOptions() {
+      const room = roomSelect.value;
+      const canUseRoomOptions = room === 'Room3' || room === 'Room5';
+
+      roomLimitedOptions.style.display = canUseRoomOptions ? 'block' : 'none';
+
+      if (!canUseRoomOptions) {
+        optionMintBath.checked = false;
+        optionCool.checked = false;
+        optionNote.textContent = 'ミント風呂・極的COOLはROOM3またはROOM5を選択した場合のみ表示されます。';
+      } else {
+        optionNote.textContent = `${room}では、ミント風呂・極的COOLを追加できます。`;
+      }
+    }
+
+    function getOptionInfo() {
+      const saunaHatCount = Number(optionSaunaHatCount.value || 0);
+      const refaSetCount = Number(optionRefaSetCount.value || 0);
+
+      const saunaHatTotal = optionPrices.saunaHat * saunaHatCount;
+      const refaSetTotal = optionPrices.refaSet * refaSetCount;
+      const mintBathTotal = optionMintBath.checked ? optionPrices.mintBath : 0;
+      const coolTotal = optionCool.checked ? optionPrices.cool : 0;
+
+      return {
+        saunaHatCount,
+        saunaHatTotal,
+        refaSetCount,
+        refaSetTotal,
+        mintBathTotal,
+        coolTotal,
+        total: saunaHatTotal + refaSetTotal + mintBathTotal + coolTotal
+      };
+    }
+
+    function getPriceInfo() {
+      const basePrice = getBasePrice();
+
+      if (basePrice === null) {
+        return {
+          ready: false,
+          basePrice: 0,
+          saunaDiscount: 0,
+          coworkingUnitPrice: 0,
+          coworkingPrice: 0,
+          optionPrice: 0,
+          finalPrice: 0,
+          options: getOptionInfo()
+        };
+      }
+
+      const people = Number(peopleSelect.value || 0);
+      const coworkingPlan = coworkingPlanSelect.value;
+      const coworkingUnitPrice = coworkingPrices[coworkingPlan] || 0;
+      const coworkingPrice = coworkingUnitPrice * people;
+      const saunaDiscount = coworkingPlan === '1日' ? Math.floor(basePrice * 0.2) : 0;
+      const options = getOptionInfo();
+
+      // 合計 = サウナ料金 + コワーキング料金×人数 + オプション料金 - サウナ割引
+      const finalPrice = basePrice + coworkingPrice + options.total - saunaDiscount;
+
+      return {
+        ready: true,
+        basePrice,
+        saunaDiscount,
+        coworkingUnitPrice,
+        coworkingPrice,
+        optionPrice: options.total,
+        finalPrice,
+        options
+      };
+    }
+
+    function updateSummary() {
+      const duration = durationSelect.value ? `${durationSelect.value}分` : '未選択';
+      const room = roomSelect.value || '未選択';
+      const people = peopleSelect.value ? `${peopleSelect.value}名` : '未選択';
+      const peopleNumber = Number(peopleSelect.value || 0);
+      const date = document.getElementById('date').value || '未選択';
+      const time = timeInput.value || '未選択';
+      const endTime = endTimeInput.value || '';
+      const name = document.getElementById('name').value || '未入力';
+      const timeText = endTime ? `${time}〜${endTime}` : time;
+
+      const coworkingPlan = coworkingPlanSelect.value;
+      const coworkingText = coworkingPlan
+        ? `<br><strong>コワーキング併用：</strong>${coworkingPlan}利用`
+        : '<br><strong>コワーキング併用：</strong>なし';
+
+      const price = getPriceInfo();
+
+      let optionHtml = '';
+
+      if (price.options.saunaHatTotal > 0) {
+        optionHtml += `<div class="note">サウナハット：${yen(optionPrices.saunaHat)} × ${price.options.saunaHatCount}個 = ${yen(price.options.saunaHatTotal)}</div>`;
+      }
+
+      if (price.options.refaSetCount > 0) {
+        const refaPriceText = optionPrices.refaSet > 0
+          ? `${yen(optionPrices.refaSet)} × ${price.options.refaSetCount}個 = ${yen(price.options.refaSetTotal)}`
+          : `${price.options.refaSetCount}個 / 金額未設定`;
+        optionHtml += `<div class="note">ReFa 3連セット：${refaPriceText}</div>`;
+      }
+
+      if (price.options.mintBathTotal > 0) {
+        optionHtml += `<div class="note">ミント風呂：${yen(price.options.mintBathTotal)}</div>`;
+      }
+
+      if (price.options.coolTotal > 0) {
+        optionHtml += `<div class="note">極的COOL：${yen(price.options.coolTotal)}</div>`;
+      }
+
+      let priceHtml = '';
+
+      if (price.ready) {
+        priceHtml = `
+          <div class="price-line">
+            <span>合計料金</span>
+            <span><span class="price-main">${yen(price.finalPrice)}</span></span>
+          </div>
+
+          <div class="note">サウナ料金：${yen(price.basePrice)}</div>
+
+          ${price.coworkingPrice > 0
+            ? `<div class="note">コワーキング料金：${yen(price.coworkingUnitPrice)} × ${peopleNumber}名 = ${yen(price.coworkingPrice)}</div>`
+            : ''
+          }
+
+          ${optionHtml}
+
+          ${price.saunaDiscount > 0
+            ? `<div class="discount-text">1日利用特典：サウナ料金20%OFF -${yen(price.saunaDiscount)}</div>`
+            : ''
+          }
+        `;
+      }
+
+      summary.innerHTML = `
+        <strong>メニュー：</strong>プライベートサウナ ${duration}<br>
+        <strong>お部屋：</strong>${room}<br>
+        <strong>人数：</strong>${people}<br>
+        <strong>日時：</strong>${date} ${timeText}<br>
+        <strong>お名前：</strong>${name}
+        ${coworkingText}
+        ${priceHtml}
+      `;
+    }
+
+    durationSelect.addEventListener('change', updateRoomOptions);
+    roomSelect.addEventListener('change', updatePeopleOptions);
+    peopleSelect.addEventListener('change', () => {
+      updateSaunaHatOptions();
+      updateSummary();
+    });
+    coworkingPlanSelect.addEventListener('change', updateSummary);
+    optionSaunaHatCount.addEventListener('change', updateSummary);
+    optionRefaSetCount.addEventListener('change', updateSummary);
+    optionMintBath.addEventListener('change', updateSummary);
+    optionCool.addEventListener('change', updateSummary);
+
+    clearBathOption.addEventListener('click', () => {
+      optionMintBath.checked = false;
+      optionCool.checked = false;
+      updateSummary();
+    });
+
+    ['date', 'name', 'phone', 'email', 'memo'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', updateSummary);
+      el.addEventListener('change', updateSummary);
+    });
+
+    document.getElementById('reservationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      if (!durationSelect.value) {
+        alert('利用時間を選択してください');
+        return;
+      }
+
+      if (!roomSelect.value) {
+        alert('お部屋を選択してください');
+        return;
+      }
+
+      if (!peopleSelect.value) {
+        alert('人数を選択してください');
+        return;
+      }
+
+      if (!document.getElementById('date').value) {
+        alert('予約日を選択してください');
+        return;
+      }
+
+      if (!timeInput.value) {
+        alert('開始時間を選択してください');
+        return;
+      }
+
+      const price = getPriceInfo();
+
+      const params = new URLSearchParams({
+        duration: durationSelect.value,
+        room: roomSelect.value,
+        people: peopleSelect.value,
+        date: document.getElementById('date').value,
+        startTime: timeInput.value,
+        endTime: endTimeInput.value,
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        memo: document.getElementById('memo').value,
+        coworkingPlan: coworkingPlanSelect.value || '利用なし',
+        saunaPrice: price.basePrice,
+        coworkingUnitPrice: price.coworkingUnitPrice,
+        coworkingPrice: price.coworkingPrice,
+        saunaDiscount: price.saunaDiscount,
+        optionSaunaHatCount: optionSaunaHatCount.value,
+        optionMintBath: optionMintBath.checked ? 'あり' : 'なし',
+        optionCool: optionCool.checked ? 'あり' : 'なし',
+        optionRefaSetCount: optionRefaSetCount.value,
+        saunaHatPrice: price.options.saunaHatTotal,
+        refaSetPrice: price.options.refaSetTotal,
+        mintBathPrice: price.options.mintBathTotal,
+        coolPrice: price.options.coolTotal,
+        optionPrice: price.optionPrice,
+        finalPrice: price.finalPrice
+      });
+
+      window.location.href = `checkout.html?${params.toString()}`;
+    });
+
+    resetRoomOptions();
+    resetPeopleOptions();
+    updateSaunaHatOptions();
+    updateRoomLimitedOptions();
+    renderTimeButtons();
+    updateSummary();
+  </script>
+</body>
+</html>
