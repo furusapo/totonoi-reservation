@@ -294,6 +294,27 @@
     }
 
   </style>
+
+<style id="customer-lookup-style">
+.customer-auto-box{
+  margin-top:10px;
+  padding:12px 14px;
+  border:1px solid rgba(184,151,90,.35);
+  border-radius:12px;
+  background:rgba(255,248,235,.75);
+  color:#3b2b16;
+  font-size:13px;
+  line-height:1.6;
+}
+.customer-auto-title{
+  font-weight:700;
+  margin-bottom:4px;
+}
+.customer-auto-sub{
+  color:#7a6445;
+}
+</style>
+
 </head>
 <body>
   <div class="page">
@@ -433,6 +454,13 @@
 
         <label for="phone">電話番号</label>
         <input type="tel" id="phone" placeholder="例：09012345678" required />
+
+<div id="customerAutoBox" class="customer-auto-box">
+  <div class="customer-auto-title" id="customerAutoName">電話番号を入力すると顧客情報を確認できます</div>
+  <div class="customer-auto-sub" id="customerAutoHistory">未入力</div>
+  <div class="customer-auto-sub" id="customerAutoMemo"></div>
+</div>
+
 
         <label for="email">メールアドレス</label>
         <input type="email" id="email" placeholder="例：sample@example.com" required />
@@ -942,5 +970,138 @@ const price = getPriceInfo();
     renderTimeButtons();
     updateSummary();
   </script>
+
+<script id="customer-lookup-script">
+let customerData = [];
+
+function normalizePhone(v){
+  return String(v || "").replace(/[^0-9]/g,"");
+}
+
+function parseCSV(text){
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quote = false;
+
+  for(let i=0;i<text.length;i++){
+    const ch = text[i];
+    const next = text[i+1];
+
+    if(ch === '"' && quote && next === '"'){
+      cell += '"';
+      i++;
+    }else if(ch === '"'){
+      quote = !quote;
+    }else if(ch === "," && !quote){
+      row.push(cell);
+      cell = "";
+    }else if((ch === "\n" || ch === "\r") && !quote){
+      if(cell !== "" || row.length){
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = "";
+      }
+      if(ch === "\r" && next === "\n") i++;
+    }else{
+      cell += ch;
+    }
+  }
+
+  if(cell !== "" || row.length){
+    row.push(cell);
+    rows.push(row);
+  }
+
+  if(!rows.length) return [];
+
+  const headers = rows.shift().map(h => h.replace(/^\uFEFF/, "").trim());
+
+  return rows.map(r => {
+    const obj = {};
+    headers.forEach((h,i)=> obj[h] = (r[i] || "").trim());
+    return obj;
+  });
+}
+
+function getValue(obj, keys){
+  for(const key of keys){
+    if(obj[key] !== undefined && obj[key] !== "") return obj[key];
+  }
+  return "";
+}
+
+function showCustomer(customer){
+  const lastName = getValue(customer, ["顧客名（姓）","姓"]);
+  const firstName = getValue(customer, ["顧客名（名）","名"]);
+  const fullName = (lastName + " " + firstName).trim()
+    || getValue(customer, ["氏名","お名前","顧客名","名前"])
+    || "登録あり";
+
+  const count = getValue(customer, ["購入回数(通算)","購入回数","来店回数","利用回数"]) || "0";
+  const amountRaw = getValue(customer, ["利用金額(通算)","利用金額","累計利用額","購入金額"]) || "0";
+  const amount = Number(String(amountRaw).replace(/[^0-9]/g,"") || 0).toLocaleString("ja-JP");
+  const rank = getValue(customer, ["ランク","会員ランク"]) || "-";
+  const point = getValue(customer, ["有効ポイント","ポイント","保有ポイント"]) || "0";
+  const memo = getValue(customer, ["顧客メモ","メモ","備考"]) || "";
+  const member = getValue(customer, ["会員/非会員","会員区分"]) || "";
+
+  const nameInput = document.getElementById("name");
+  if(nameInput && !nameInput.value) nameInput.value = fullName;
+
+  document.getElementById("customerAutoName").textContent = fullName;
+  document.getElementById("customerAutoHistory").textContent = `${member} ／ 来店 ${count}回 ／ 累計 ${amount}円`;
+  document.getElementById("customerAutoMemo").textContent = memo ? `${memo} ／ ランク：${rank} ／ ポイント：${point}` : `ランク：${rank} ／ ポイント：${point}`;
+}
+
+function showCustomerDefault(){
+  document.getElementById("customerAutoName").textContent = "電話番号を入力すると顧客情報を確認できます";
+  document.getElementById("customerAutoHistory").textContent = "未入力";
+  document.getElementById("customerAutoMemo").textContent = "";
+}
+
+function showCustomerNotFound(){
+  document.getElementById("customerAutoName").textContent = "未登録のお客様";
+  document.getElementById("customerAutoHistory").textContent = "新規予約として受付できます";
+  document.getElementById("customerAutoMemo").textContent = "";
+}
+
+fetch("customers.csv?v=" + Date.now())
+  .then(r => {
+    if(!r.ok) throw new Error("customers.csv が読めません: " + r.status);
+    return r.text();
+  })
+  .then(text => {
+    customerData = parseCSV(text);
+    console.log("顧客CSV読込完了", customerData.length);
+  })
+  .catch(err => {
+    console.warn("顧客CSV読込失敗", err);
+  });
+
+document.addEventListener("input", e => {
+  if(e.target.id !== "phone") return;
+
+  const inputPhone = normalizePhone(e.target.value);
+
+  if(inputPhone.length < 10){
+    showCustomerDefault();
+    return;
+  }
+
+  const customer = customerData.find(c => {
+    const csvPhone = normalizePhone(getValue(c, ["電話番号","電話","携帯番号","TEL","tel","Phone"]));
+    return csvPhone === inputPhone;
+  });
+
+  if(customer){
+    showCustomer(customer);
+  }else{
+    showCustomerNotFound();
+  }
+});
+</script>
+
 </body>
 </html>
